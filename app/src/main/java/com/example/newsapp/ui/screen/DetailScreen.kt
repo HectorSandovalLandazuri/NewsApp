@@ -53,11 +53,11 @@ fun DetailScreen(article:TopNewsArticle,scrollState: ScrollState,navController: 
                 .fillMaxWidth()
                 .padding(8.dp)
                 , horizontalArrangement = Arrangement.SpaceBetween) {
-                InfoWithIcon(icon = Icons.Default.Edit , info = article.author?:"Not Available")
-                InfoWithIcon(icon = Icons.Default.DateRange , info = MockData.stringToDate(article.publishedAt!!).getTimeAgo())
+                InfoWithIcon(icon = Icons.Default.Edit , info = article.author?:"Not Available Author")
+                InfoWithIcon(icon = Icons.Default.DateRange , info = MockData.stringToDate(article.publishedAt?:"2024-04-12T10:00:52").getTimeAgo())
             }
-            Text(text=article.title?:"Not Available", fontWeight = FontWeight.Bold, modifier=Modifier.align(alignment = Alignment.Start))
-            Text(text=article.description?:"Not Available", modifier= Modifier
+            Text(text=article.title?:"Not Available Title", fontWeight = FontWeight.Bold, modifier=Modifier.align(alignment = Alignment.Start))
+            Text(text=article.description?:"Not Available Description", modifier= Modifier
                 .padding(top = 16.dp)
                 .align(alignment = Alignment.Start))
         }

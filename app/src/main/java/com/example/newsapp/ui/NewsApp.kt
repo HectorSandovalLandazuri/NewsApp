@@ -42,16 +42,25 @@ fun MainScreen(navController: NavHostController,scrollState: ScrollState){
 
 @Composable
 fun Navigation(navController: NavHostController, scrollState: ScrollState,newsManager: NewsManager= NewsManager(),paddingValues: PaddingValues){
-    val articles=newsManager.newsResponse.value.articles
+    val articles=  mutableListOf(TopNewsArticle())
+    articles.addAll(newsManager.newsResponse.value.articles?: listOf(TopNewsArticle()))
+
     Log.d("news","$articles")
     articles?.let {
         NavHost(navController = navController, startDestination =
             BottomMenuScreen.TopNews.route, modifier = Modifier.padding(paddingValues)){
-            bottomNavigation(navController,articles,newsManager)
+            bottomNavigation(navController=navController,articles,newsManager)
             composable("Detail/{index}",
                 arguments = listOf(navArgument("index"){type = NavType.IntType})) { navBackStackEntry ->
                 val index = navBackStackEntry.arguments?.getInt("index")
                 index?.let {
+                    if(newsManager.query.value.isNotEmpty()) {
+                        articles.clear()
+                        articles.addAll(newsManager.searchedNewsResponse.value.articles?: listOf())
+                    } else {
+                        articles.clear()
+                        articles.addAll(newsManager.newsResponse.value.articles?:listOf())
+                    }
                     val article = articles[index]
                     DetailScreen(article, scrollState, navController)
                 }
@@ -64,7 +73,7 @@ fun Navigation(navController: NavHostController, scrollState: ScrollState,newsMa
 fun NavGraphBuilder.bottomNavigation(navController:NavController,articles:List<TopNewsArticle>,
     newsManager: NewsManager){
     composable(BottomMenuScreen.TopNews.route){
-        TopNews(navController, articles )
+        TopNews(navController=navController, articles,newsManager.query,newsManager =newsManager )
     }
     composable(BottomMenuScreen.Categories.route){
         newsManager.getArticlesByCategory("business")
