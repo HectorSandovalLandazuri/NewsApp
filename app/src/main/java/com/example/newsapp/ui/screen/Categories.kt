@@ -11,6 +11,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -22,25 +24,41 @@ import androidx.compose.ui.unit.dp
 import com.example.newsapp.MockData
 import com.example.newsapp.MockData.getTimeAgo
 import com.example.newsapp.R
+import com.example.newsapp.components.ErrorUI
+import com.example.newsapp.components.LoadingUI
 import com.example.newsapp.models.TopNewsArticle
 import com.example.newsapp.models.getAllArticleCategory
-import com.example.newsapp.network.NewsManager
+import com.example.newsapp.ui.MainViewModel
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
-fun Categories(onFetchCategory: (String) -> Unit={}, newsManager: NewsManager){
+fun Categories(onFetchCategory: (String) -> Unit={}, viewModel: MainViewModel, isLoading:MutableState<Boolean>, isError:MutableState<Boolean>){
     val tabItems= getAllArticleCategory()
-    Column() {
-        LazyRow {
-            items(tabItems.size){
-                val category=tabItems[it]
-                CategoryTab(category = category.categoryName, onFetchCategory = onFetchCategory,
-                    isSelected = newsManager.selectedCategory.value==category)
+
+    when {
+        isLoading.value -> {
+            LoadingUI()
+        }
+        isError.value -> {
+            ErrorUI()
+        }
+        else -> {
+            Column {
+                LazyRow {
+                    items(tabItems.size){
+                        val category=tabItems[it]
+                        CategoryTab(category = category.categoryName, onFetchCategory = onFetchCategory,
+                            isSelected = viewModel.selectedCategory.collectAsState().value==category)
+                    }
+                }
+                ArticleContent(articles = viewModel.getArticleByCategory.collectAsState().value.articles ?: listOf())
             }
         }
-        ArticleContent(articles = newsManager.getArticleByCategory.value.articles ?: listOf())
     }
 }
+
+
+
 
 
 

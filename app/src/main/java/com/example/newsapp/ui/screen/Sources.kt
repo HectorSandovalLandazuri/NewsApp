@@ -24,11 +24,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.newsapp.R
+import com.example.newsapp.components.ErrorUI
+import com.example.newsapp.components.LoadingUI
 import com.example.newsapp.models.TopNewsArticle
 import com.example.newsapp.network.NewsManager
+import com.example.newsapp.ui.MainViewModel
 
 @Composable
-fun Sources(newsManager:NewsManager){
+fun Sources(viewModel: MainViewModel, isLoading:MutableState<Boolean>, isError: MutableState<Boolean>){
 
     val items=listOf(
         "TechCrunch" to "techcrunch",
@@ -41,7 +44,7 @@ fun Sources(newsManager:NewsManager){
 
     Scaffold(topBar={
         TopAppBar(title = {
-            Text(text="${newsManager.sourceName.value} Source")
+            Text(text="${viewModel.sourceName.collectAsState().value} Source")
         },
         actions = {
             var menuExpanded by remember { mutableStateOf(false)}
@@ -52,7 +55,8 @@ fun Sources(newsManager:NewsManager){
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = {menuExpanded=false}) {
                     items.forEach {
                         DropdownMenuItem(onClick = {
-                            newsManager.sourceName.value =it.second
+                            viewModel.sourceName.value =it.second
+                            viewModel.getArticlesBySource()
                             menuExpanded =false
                         }) {
                             Text(it.first)
@@ -62,9 +66,18 @@ fun Sources(newsManager:NewsManager){
             }
         })
     }) {
-        newsManager.getArticlesBySource()
-        val article = newsManager.getArticleBySource.value
-        SourceContent(articles = article.articles?: listOf())
+        when {
+            isLoading.value -> {
+                LoadingUI()
+            }
+            isError.value -> {
+                ErrorUI()
+            }else -> {
+                viewModel.getArticlesBySource()
+                val articles = viewModel.getArticlesBySource.collectAsState().value
+                SourceContent(articles = articles.articles?: listOf())
+            }
+        }
     }
 }
 
